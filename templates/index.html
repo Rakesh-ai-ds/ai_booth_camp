@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webcam Filter & QR Code Generator</title>
+</head>
+<body>
+    <h1>Webcam Filter & QR Code Generator</h1>
+    
+    <button onclick="captureImage()">Capture Image</button>
+    <img id="capturedImage" src="" style="display:none;">
+    
+    <select id="filterType">
+        <option value="gray">Grayscale</option>
+        <option value="sepia">Sepia</option>
+        <option value="blur">Blur</option>
+    </select>
+    <button onclick="applyFilter()">Apply Filter</button>
+    
+    <button onclick="generateQR()">Generate QR Code</button>
+    <img id="qrCodeImage" src="" style="display:none;">
+
+    <script>
+        function captureImage() {
+            fetch('/capture', { method: 'POST' })
+            .then(response => response.text())
+            .then(imagePath => {
+                document.getElementById("capturedImage").src = imagePath;
+                document.getElementById("capturedImage").style.display = "block";
+            });
+        }
+
+        function applyFilter() {
+            let filter = document.getElementById("filterType").value;
+            let imagePath = document.getElementById("capturedImage").src;
+            
+            fetch('/apply_filter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `image_path=${imagePath}&filter=${filter}`
+            })
+            .then(response => response.text())
+            .then(filteredImage => {
+                document.getElementById("capturedImage").src = filteredImage;
+            });
+        }
+
+        function generateQR() {
+            let imagePath = document.getElementById("capturedImage").src;
+            
+            fetch('/generate_qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `image_path=${imagePath}`
+            })
+            .then(response => response.text())
+            .then(qrImage => {
+                document.getElementById("qrCodeImage").src = qrImage;
+                document.getElementById("qrCodeImage").style.display = "block";
+            });
+        }
+    </script>
+</body>
+</html>
